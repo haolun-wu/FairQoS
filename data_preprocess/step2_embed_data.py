@@ -65,10 +65,9 @@ def similarity_and_probabilities(query_embeddings, cluster_centers):
     return similarity_matrix, p_query_given_center, p_center_given_query
 
 
-
-if __name__ == "__main__":
-    data_name = 'sogou'
-    file_path = f"../data_preprocessed/{data_name}/{data_name}_processed.csv"
+def run_step2_embed_data(data_name):
+    data_name = 'sogou_small'
+    file_path = f"../data_preprocessed/{data_name}/raw_{data_name}_processed.csv"
     df = load_data(file_path)
 
     # Clean up 'Query' column
@@ -102,7 +101,7 @@ if __name__ == "__main__":
     query_df.to_csv(f"../data_preprocessed/{data_name}/q_mapping.csv", index=False)
     np.save(f"../data_preprocessed/{data_name}/q_emb_matrix.npy", query_embeddings)
     np.save(f"../data_preprocessed/{data_name}/t_emb_matrix.npy", cluster_centers)
-    df.to_csv(f"../data_preprocessed/{data_name}/updated_{data_name}_processed.csv", index=False)
+    df.to_csv(f"../data_preprocessed/{data_name}/new_{data_name}_processed.csv", index=False)
 
     print(f"Obtained {len(cluster_centers)} cluster centers.")
 
@@ -115,3 +114,7 @@ if __name__ == "__main__":
     np.save(f"../data_preprocessed/{data_name}/prob_q_t.npy", p_qt)
     np.save(f"../data_preprocessed/{data_name}/prob_t_q.npy", p_tq)
 
+
+if __name__ == "__main__":
+    data_name = 'sogou_small'
+    run_step2_embed_data(data_name)

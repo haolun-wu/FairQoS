@@ -5,8 +5,9 @@ def generate_prefixes(query_pinyin):
     words = str(query_pinyin).split()
     return [' '.join(words[:i + 1]) for i in range(len(words))]
 
-def generate_and_save_prefix_data(filename, data_name, n):
+def run_step3_generate_prefix(data_name, n):
     # 1. Load the file
+    filename = f'../data_preprocessed/{data_name}/q_mapping.csv'
     df = pd.read_csv(filename)
 
     # 2. Generate all possible prefixes
@@ -49,5 +50,4 @@ def generate_and_save_prefix_data(filename, data_name, n):
 
 if __name__ == "__main__":
     data_name = 'sogou_small'
-    # Usage
-    generate_and_save_prefix_data(f'../data_preprocessed/{data_name}/q_mapping.csv', data_name, n=20)
+    run_step3_generate_prefix(data_name, n=20)
