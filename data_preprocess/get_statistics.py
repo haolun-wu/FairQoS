@@ -16,15 +16,15 @@ def basic_statistics(data_name):
         unique_users = data_df['UserID'].unique()
         print("# Users:", len(unique_users))
         unique_queries = data_df['Query'].unique()
-        print("# Queries:", len(unique_queries))
+        print("# Queries (o):", len(unique_queries))
         unique_prefixes = prefix_df['Query_prefix'].unique()
-        print("# Prefixes:", len(unique_prefixes))
+        print("# Prefixes (i):", len(unique_prefixes))
         unique_clusters = data_df['ClusterID'].unique()
-        print("# Clusters:", len(unique_clusters))
+        print("# Clusters (t):", len(unique_clusters))
         unique_urls = data_df['URLID'].unique()
         print("# Urls:", len(unique_urls))
         unique_groups = data_df['UserGroup'].unique()
-        print("# UserGroup:", len(unique_groups))
+        print("# UserGroup (g):", len(unique_groups))
 
 
 def run_statistics(data_name):

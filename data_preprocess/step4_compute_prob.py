@@ -14,15 +14,15 @@ def plot_heatmap(matrix, title):
     plt.show()
 
 
-def compute_p_q_ig(data_name):
+def compute_p_o_ig(data_name):
     data_file = f'../data_preprocessed/{data_name}/new_{data_name}_processed.csv'
     mapping_file = f'../data_preprocessed/{data_name}/i_mapping.csv'
-    iq_data_file = f'../data_preprocessed/{data_name}/i_q_data.csv'
+    io_data_file = f'../data_preprocessed/{data_name}/i_o_data.csv'
 
     # Load the datasets
     df = pd.read_csv(data_file)
     prefix_mapping = pd.read_csv(mapping_file)
-    iq_data = pd.read_csv(iq_data_file)
+    io_data = pd.read_csv(io_data_file)
 
     # Determine unique groups
     unique_groups = df['UserGroup'].unique()
@@ -34,7 +34,7 @@ def compute_p_q_ig(data_name):
     prefix_ids_sorted = sorted(prefix_mapping['Query_prefix_id'].values)
     prefix_id_to_index = {id: idx for idx, id in enumerate(prefix_ids_sorted)}
 
-    # Determine unique groups and initialize matrices
+    # Initialize matrices for p(o|i,g)
     matrices = {}
     for group in unique_groups:
         matrices[group] = np.zeros((len(query_ids_sorted), len(prefix_ids_sorted)))
@@ -44,60 +44,106 @@ def compute_p_q_ig(data_name):
         query_id = row['QueryID']
         user_group = row['UserGroup']
 
-        # Get the possible prefixes for this query from iq_data
-        possible_prefixes = iq_data[iq_data['QueryID'] == query_id]['Query_prefix_id'].values
+        # Get the possible prefixes for this query from io_data
+        possible_prefixes = io_data[io_data['QueryID'] == query_id]['Query_prefix_id'].values
 
         # Increment the count in the matrix for each prefix using mapped indices
         for prefix_id in possible_prefixes:
-            # Using get method to provide a default value of -1 for non-existing keys
             q_idx = query_id_to_index.get(query_id, -1)
             p_idx = prefix_id_to_index.get(prefix_id, -1)
 
             if q_idx != -1 and p_idx != -1:  # Ensure valid indices
                 matrices[user_group][q_idx, p_idx] += 1
 
-    # Normalize each matrix
+    # Normalize each matrix and store in the dictionary
+    prob_o_ig_dict = {}
     for group, matrix in matrices.items():
         column_sums = matrix.sum(axis=0)
         column_sums[column_sums == 0] = 1  # To avoid division by zero
-        matrices[group] = matrix / column_sums[np.newaxis, :]
+        prob_o_ig_dict[group] = matrix / column_sums[np.newaxis, :]
 
-        # Save the matrix using numerical label
-        save_path = f"../data_preprocessed/{data_name}/prob_q_ig_{group}.npy"
-        np.save(save_path, matrices[group])
+    print("--------")
+    print("prob_o_ig_dict:")
+    print("keys:", prob_o_ig_dict.keys())
+    print("Shape and sum:", prob_o_ig_dict[0].shape, prob_o_ig_dict[0].sum())
+    print("--------")
 
-        if os.path.exists(save_path):
-            loaded_matrix = np.load(save_path)
-            print("prob_q_ig:", loaded_matrix.shape)
-            # print("prob_q_ig:", loaded_matrix.sum(0))
+    # Save the entire dictionary
+    np.save(f"../data_preprocessed/{data_name}/prob_matrix/prob_o_ig_dict.npy", prob_o_ig_dict)
 
     return unique_groups
 
 
 def compute_p_t_ig(data_name, unique_groups):
-    # Load p(t|q)
-    prob_t_q = np.load(f'../data_preprocessed/{data_name}/prob_t_q.npy')
+    # Load p(t|o)
+    prob_t_o = np.load(f'../data_preprocessed/{data_name}/prob_matrix/prob_t_o.npy')
 
+    # Initialize prob_t_ig dictionary
+    prob_t_ig_dict = {}
     for group in unique_groups:
-        # Load p(q|i,g) for the specific group using the numeric label
-        prob_q_ig = np.load(f'../data_preprocessed/{data_name}/prob_q_ig_{group}.npy')
+        # Load p(o|i,g) for the specific group from the dictionary
+        prob_o_ig = \
+            np.load(f'../data_preprocessed/{data_name}/prob_matrix/prob_o_ig_dict.npy', allow_pickle=True).item()[group]
 
         # Compute p(t|i,g)
-        prob_t_ig = np.matmul(prob_t_q, prob_q_ig)
+        prob_t_ig = np.matmul(prob_t_o, prob_o_ig)
+        prob_t_ig_dict[group] = prob_t_ig
 
-        # Save the matrix using the numeric label
-        save_path = f"../data_preprocessed/{data_name}/prob_t_ig_{group}.npy"
-        np.save(save_path, prob_t_ig)
+    print("--------")
+    print("prob_t_ig_dict:")
+    print("keys:", prob_t_ig_dict.keys())
+    print("Shape and sum:", prob_t_ig_dict[0].shape, prob_t_ig_dict[0].sum())
+    print("--------")
 
-        # Optional: print to verify
-        if os.path.exists(save_path):
-            loaded_matrix = np.load(save_path)
-            print("prob_t_ig:", loaded_matrix.shape)
+    # Save the entire dictionary
+    np.save(f"../data_preprocessed/{data_name}/prob_matrix/prob_t_ig_dict.npy", prob_t_ig_dict)
+
+
+def compute_p_i_and_p_i_g(data_name, unique_groups):
+    # Load the sorted prefix dataframe
+    sorted_prefix_df = pd.read_csv(f'../data_preprocessed/{data_name}/i_mapping.csv')
+
+    # Compute p(i)
+    total_count = sorted_prefix_df["Count"].sum()
+    prob_i = sorted_prefix_df["Count"] / total_count
+    np.save(f'../data_preprocessed/{data_name}/prob_matrix/prob_i.npy', prob_i.values)
+
+    # Load the prefix_df and data_df
+    prefix_df = pd.read_csv(f'../data_preprocessed/{data_name}/i_o_data.csv')
+    data_df = pd.read_csv(f'../data_preprocessed/{data_name}/new_{data_name}_processed.csv')
+
+    # Merge them based on 'QueryID' to get 'UserGroup' in prefix_df
+    merged_df = prefix_df.merge(data_df[['QueryID', 'UserGroup']], on='QueryID', how='left')
+
+    # Compute p(i|g)
+    prob_i_g_dict = {}
+    for group in unique_groups:
+        filtered_df = merged_df[merged_df['UserGroup'] == group]
+        group_counts = filtered_df['Query_prefix'].value_counts()
+        group_total = group_counts.sum()
+        group_probs = group_counts / group_total
+
+        # Ensure the length and order of probabilities
+        probs = sorted_prefix_df['Query_prefix'].map(group_probs).fillna(0).values
+        prob_i_g_dict[group] = probs
+
+    print("prob_i:")
+    print("shape and sum:", prob_i.shape, prob_i.sum())
+    print("--------")
+    print("p_i_g_dict:")
+    print("keys:", prob_i_g_dict.keys())
+    print("shape and sum:", prob_i_g_dict[0].shape, prob_i_g_dict[0].sum())
+    print("--------")
+
+    np.save(f'../data_preprocessed/{data_name}/prob_matrix/prob_i_g_dict.npy', prob_i_g_dict)
+
+    return prob_i, prob_i_g_dict
 
 
 def run_step4_compute_prob(data_name):
-    unique_groups = compute_p_q_ig(data_name)
+    unique_groups = compute_p_o_ig(data_name)
     compute_p_t_ig(data_name, unique_groups)
+    compute_p_i_and_p_i_g(data_name, unique_groups)
 
 
 if __name__ == "__main__":
@@ -105,8 +151,8 @@ if __name__ == "__main__":
     run_step4_compute_prob(data_name)
 
     # # Load matrices
-    # matrix_active = np.load(f'../data_preprocessed/{data_name}/prob_q_ig_Active.npy')
-    # matrix_inactive = np.load(f'../data_preprocessed/{data_name}/prob_q_ig_Less Active.npy')
+    # matrix_active = np.load(f'../data_preprocessed/{data_name}/prob_o_ig_Active.npy')
+    # matrix_inactive = np.load(f'../data_preprocessed/{data_name}/prob_o_ig_Less Active.npy')
     #
     # # Plot heatmaps
     # plot_heatmap(matrix_active, "Probability Distribution for Active User Group")
