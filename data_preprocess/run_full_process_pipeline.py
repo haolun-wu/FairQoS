@@ -4,6 +4,7 @@ from data_preprocess.step3_generate_prefix import run_step3_generate_prefix
 from data_preprocess.step4_compute_prob import run_step4_compute_prob
 from step5_generate_query_ranking import run_step5_compute_prob_exposure
 from step6_compute_p_t_i_success import run_step6_compute_p_t_i_success
+from step7_prob_success import run_step7_prob_success
 from data_preprocess.get_statistics import run_statistics
 
 if __name__ == '__main__':
@@ -17,3 +18,4 @@ if __name__ == '__main__':
     run_statistics(data_name)
     run_step5_compute_prob_exposure(data_name)
     run_step6_compute_p_t_i_success(data_name)
+    run_step7_prob_success(data_name)

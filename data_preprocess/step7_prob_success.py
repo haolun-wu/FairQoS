@@ -35,9 +35,14 @@ def compute_product_of_sum(data_name):
     return prod_g
 
 
-if __name__ == "__main__":
-    data_name = 'sogou_small'
+def run_step7_prob_success(data_name):
     p_s_sum_of_product = compute_sum_of_product(data_name)
     p_s_product_of_sum = compute_product_of_sum(data_name)
     print(f"Sum-of-Product p(S): {p_s_sum_of_product}")
     print(f"Product-of-Sum p(S): {p_s_product_of_sum}")
+    return
+
+
+if __name__ == "__main__":
+    data_name = 'sogou_small'
+    run_step7_prob_success(data_name)

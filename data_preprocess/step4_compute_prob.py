@@ -5,12 +5,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-def plot_heatmap(matrix, title):
+def plot_heatmap(matrix, title, xlabel_name, ylabel_name):
     plt.figure(figsize=(10, 10))  # Adjust the figure size for better visualization
     sns.heatmap(matrix, cmap="YlGnBu", cbar_kws={'label': 'Probability'})
     plt.title(title)
-    plt.xlabel('Prefix ID')
-    plt.ylabel('Query ID')
+    plt.xlabel(xlabel_name)
+    plt.ylabel(ylabel_name)
     plt.show()
 
 
@@ -150,10 +150,17 @@ if __name__ == "__main__":
     data_name = 'sogou_small'
     run_step4_compute_prob(data_name)
 
-    # # Load matrices
-    # matrix_active = np.load(f'../data_preprocessed/{data_name}/prob_o_ig_Active.npy')
-    # matrix_inactive = np.load(f'../data_preprocessed/{data_name}/prob_o_ig_Less Active.npy')
-    #
-    # # Plot heatmaps
-    # plot_heatmap(matrix_active, "Probability Distribution for Active User Group")
-    # plot_heatmap(matrix_inactive, "Probability Distribution for Inactive User Group")
+    # Load matrices
+    prob_o_ig = np.load(f'../data_preprocessed/{data_name}/prob_matrix/prob_o_ig_dict.npy', allow_pickle=True).item()
+    prob_t_ig = np.load(f'../data_preprocessed/{data_name}/prob_matrix/prob_t_ig_dict.npy', allow_pickle=True).item()
+
+    # Plot heatmaps
+    plot_heatmap(prob_o_ig[0], "Probability Distribution for User Group 0", xlabel_name='prefix (i)',
+                 ylabel_name='query (o)')
+    plot_heatmap(prob_o_ig[1], "Probability Distribution for User Group 1", xlabel_name='prefix (i)',
+                 ylabel_name='query (o)')
+
+    plot_heatmap(prob_t_ig[0], "Probability Distribution for User Group 0", xlabel_name='prefix (i)',
+                 ylabel_name='intent (t)')
+    plot_heatmap(prob_t_ig[1], "Probability Distribution for User Group 1", xlabel_name='prefix (i)',
+                 ylabel_name='intent (t)')

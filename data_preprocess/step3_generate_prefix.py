@@ -6,11 +6,11 @@ def generate_prefixes(query_pinyin):
     return [' '.join(words[:i + 1]) for i in range(len(words))]
 
 def run_step3_generate_prefix(data_name, ncount):
-    # 1. Load the file
-    filename = f'../data_preprocessed/{data_name}/o_mapping.csv'
+    # 1. Load the full dataset with all query occurrences
+    filename = f'../data_preprocessed/{data_name}/new_{data_name}_processed.csv'
     df = pd.read_csv(filename)
 
-    # 2. Generate all possible prefixes
+    # 2. Generate all possible prefixes for each query instance
     all_prefixes = []
     for _, row in df.iterrows():
         query_id = row["QueryID"]

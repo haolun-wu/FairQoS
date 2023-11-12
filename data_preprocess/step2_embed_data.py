@@ -109,12 +109,12 @@ def run_step2_embed_data(data_name, ncluster=20):
 
     print(f"Obtained {len(cluster_centers)} cluster centers.")
 
-    # Combute p(query|center) and p(center_query)
+    # Combute p(query|center) and p(center|query)
     similarity_matrix, p_ot, p_to = similarity_and_probabilities(query_embeddings, cluster_centers)
     print("p_ot:", p_ot.shape)
-    print("p_ot:", p_ot.sum(0).shape)
+    print("p_ot:", p_ot.sum(0))
     print("p_to:", p_to.shape)
-    print("p_to:", p_to.sum(0).shape)
+    print("p_to:", p_to.sum(0))
     np.save(f"../data_preprocessed/{data_name}/prob_matrix/prob_o_t.npy", p_ot)
     np.save(f"../data_preprocessed/{data_name}/prob_matrix/prob_t_o.npy", p_to)
 
