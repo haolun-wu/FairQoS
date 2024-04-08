@@ -38,7 +38,7 @@ def run_step3_generate_prefix(data_name, ncount):
     # Re-arrange the columns for better readability
     sorted_prefix_df = sorted_prefix_df[["Query_prefix_id", "Query_prefix", "Count"]]
     # Save the sorted dataframe to a file
-    sorted_prefix_df.to_csv(f'../data_preprocessed/{data_name}/i_mapping.csv', index=False)
+    sorted_prefix_df.to_csv(f'../data_preprocessed/{data_name}/q_mapping.csv', index=False)
 
     # 6. Add the Query_prefix_id to prefix_df
     prefix_id_map = sorted_prefix_df.set_index('Query_prefix')['Query_prefix_id'].to_dict()
@@ -46,7 +46,7 @@ def run_step3_generate_prefix(data_name, ncount):
 
     # 7. Save the resulting data with desired column order
     prefix_df = prefix_df[["Query_pinyin", "Query_prefix", "QueryID", "Query_prefix_id"]]
-    prefix_df.to_csv(f'../data_preprocessed/{data_name}/i_o_data.csv', index=False)
+    prefix_df.to_csv(f'../data_preprocessed/{data_name}/d_q_mapping.csv', index=False)
 
 if __name__ == "__main__":
     data_name = 'sogou_small'
