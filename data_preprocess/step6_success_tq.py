@@ -45,7 +45,6 @@ def run_step6_compute_success_tq(data_name):
 
     return success_tq
 
-
 if __name__ == "__main__":
     data_name = 'sogou_small'
     success_tq = run_step6_compute_success_tq(data_name)
