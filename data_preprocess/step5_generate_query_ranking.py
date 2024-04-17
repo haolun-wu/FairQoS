@@ -77,7 +77,7 @@ def run_step5_compute_prob_exposure(data_name, ranking_method="MPC", patience=0.
         for row in ranking_matrix:
             if len(set(row)) != len(row):
                 print("Warning: Duplicate IDs found in a row.")
-        print("Check no-duplication for each row successfully.")
+        # print("Check no-duplication for each row successfully.")
 
         exposure_matrix = np.power(patience, ranking_matrix)
     else:
@@ -90,8 +90,8 @@ def run_step5_compute_prob_exposure(data_name, ranking_method="MPC", patience=0.
     file_path = f"../data_preprocessed/{data_name}/prob_matrix/p(d_exposure|q).npy"
     np.save(file_path, exposure_matrix.T)
 
-    print("q_d_exposure_matrix shape:", exposure_matrix.shape)
-    print("p(d_exposure|q) shape and sum:", exposure_matrix.T.shape, exposure_matrix.T.sum())
+    # print("q_d_exposure_matrix shape:", exposure_matrix.shape)
+    # print("p(d_exposure|q) shape and sum:", exposure_matrix.T.shape, exposure_matrix.T.sum())
 
 
 if __name__ == "__main__":

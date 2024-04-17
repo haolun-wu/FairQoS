@@ -6,8 +6,8 @@ def run_step6_compute_success_tq(data_name):
     prob_d_t = np.load(f"../data_preprocessed/{data_name}/prob_matrix/p(d|t).npy")
     prob_d_q_exposure = np.load(f"../data_preprocessed/{data_name}/prob_matrix/p(d_exposure|q).npy")
 
-    print("prob_d_t:", prob_d_t.shape)
-    print("prob_d_q_exposure:", prob_d_q_exposure.shape)
+    # print("prob_d_t:", prob_d_t.shape)
+    # print("prob_d_q_exposure:", prob_d_q_exposure.shape)
 
     # Check the shapes for compatibility
     assert prob_d_t.shape[0] == prob_d_q_exposure.shape[
@@ -29,7 +29,7 @@ def run_step6_compute_success_tq(data_name):
 
     file_path = f"../data_preprocessed/{data_name}/prob_matrix/p(s_d|tq).npy"
     np.save(file_path, success_d_tq)
-    print("success_d_tq:", success_d_tq.shape)
+    # print("success_d_tq:", success_d_tq.shape)
 
     # Compute p(s|t,q)
     complement_ps_d_tq = 1 - success_d_tq
@@ -41,7 +41,7 @@ def run_step6_compute_success_tq(data_name):
     success_tq = 1 - product_complement
     file_path = f"../data_preprocessed/{data_name}/prob_matrix/p(s|tq).npy"
     np.save(file_path, success_tq)
-    print("success_tq:", success_tq.shape)
+    # print("success_tq:", success_tq.shape)
 
     return success_tq
 
