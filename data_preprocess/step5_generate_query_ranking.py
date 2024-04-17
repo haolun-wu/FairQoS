@@ -1,8 +1,21 @@
 import pandas as pd
 import numpy as np
+from scipy.special import softmax
 
 
-def generate_ranking_matrix(data_name, ranking_method="MPC"):
+def add_gumbel_noise_and_rank(scores):
+    # Adding Gumbel noise to each score
+    # Gumbel(0,1) can be sampled using -log(-log(U)) where U is uniform(0,1)
+    gumbel_noise = -np.log(-np.log(np.random.uniform(0, 1, size=scores.shape)))
+    noisy_scores = scores + gumbel_noise
+
+    # Getting indices of scores sorted from highest to lowest
+    sorted_indices = np.argsort(-noisy_scores)
+
+    return sorted_indices
+
+
+def run_step5_compute_prob_exposure(data_name, ranking_method="MPC", patience=0.8, rand_tau=0):
     # Load data
     file_path = f'../data_preprocessed/{data_name}'
     q_mapping = pd.read_csv(f"{file_path}/q_mapping.csv")
@@ -18,7 +31,8 @@ def generate_ranking_matrix(data_name, ranking_method="MPC"):
     popularity_map = dict(zip(d_t_mapping["QueryID"], d_t_mapping["Popularity"]))
 
     # Initialize a new ranking matrix where each column represents the same query ID
-    restructured_ranking_matrix = np.zeros((num_query_prefix, num_queries), dtype=int)
+    ranking_matrix = np.zeros((num_query_prefix, num_queries), dtype=int)
+    exposure_matrix = np.zeros((num_query_prefix, num_queries))
 
     for index, i in enumerate(query_prefix_ids):
         # Filter out relevant queries (where the pair is present in d_q_mapping)
@@ -34,26 +48,40 @@ def generate_ranking_matrix(data_name, ranking_method="MPC"):
         # Combine the relevant and non-relevant ranked lists
         combined_queries = pd.concat([relevant_queries, non_relevant_queries])
 
-        # Ude which model to offer score
+        # Use which model to offer score
         if ranking_method == "MPC":
             combined_queries["scores"] = combined_queries["Popularity"]
+            scores_df = combined_queries.sort_values(by="scores", ascending=False)
+            scores_array = scores_df["scores"].values
+            id_array = scores_df["QueryID"].values
 
-        # Create the ranking list for the current query_prefix and restructure it
-        scores_df = combined_queries.sort_values(by="scores", ascending=False)
-        current_ranking = scores_df["QueryID"].values
-        for rank, query_id in enumerate(current_ranking):
-            restructured_ranking_matrix[index, query_id] = rank + 1
+        if rand_tau == 0:
+            # Create the ranking list for the current query_prefix and restructure it
+            for rank, query_id in enumerate(id_array):
+                ranking_matrix[index, query_id] = rank
+        else:
+            # print("scores_array:", scores_array.shape)
+            scores_array[scores_array < 0] = 0
+            scores_array = scores_array / np.sum(scores_array)
+            weight = softmax(scores_array / rand_tau)
 
-    # Save restructured ranking matrix
-    np.savetxt(f"{file_path}/q_d_ranking_position.csv", restructured_ranking_matrix, delimiter=",", fmt="%d")
-    print("q_d_ranking_position:", restructured_ranking_matrix.shape)
+            sample_times = 50
 
-    return restructured_ranking_matrix
+            for sample_epoch in range(sample_times):
+                exp_vector = np.power(patience, np.arange(num_queries)).astype("float")  # pre-compute the exposure
+                selected_id = np.random.choice(num_queries, num_queries, replace=False, p=weight)
+                exposure_matrix[index][selected_id] += exp_vector
 
+    if rand_tau == 0:
+        # Check each row
+        for row in ranking_matrix:
+            if len(set(row)) != len(row):
+                print("Warning: Duplicate IDs found in a row.")
+        print("Check no-duplication for each row successfully.")
 
-def calculate_exposure(rank_matrix, data_name, patience=0.9):
-    # User browsing model as RBP
-    exposure_matrix = np.power(patience, rank_matrix - 1)
+        exposure_matrix = np.power(patience, ranking_matrix)
+    else:
+        exposure_matrix /= sample_times
 
     # Save the exposure matrix to a numpy array file
     file_path = f"../data_preprocessed/{data_name}/d_q_exposure_matrix.npy"
@@ -66,18 +94,6 @@ def calculate_exposure(rank_matrix, data_name, patience=0.9):
     print("p(d_exposure|q) shape and sum:", exposure_matrix.T.shape, exposure_matrix.T.sum())
 
 
-def run_step5_compute_prob_exposure(data_name):
-    ranking_matrix = generate_ranking_matrix(data_name)
-
-    # Check each row
-    for row in ranking_matrix:
-        if len(set(row)) != len(row):
-            print("Warning: Duplicate IDs found in a row.")
-    print("Check no-duplication for each row successfully.")
-
-    calculate_exposure(ranking_matrix, data_name, patience=0.8)
-
-
 if __name__ == "__main__":
     data_name = 'sogou_small'
-    run_step5_compute_prob_exposure(data_name)
+    run_step5_compute_prob_exposure(data_name, ranking_method="MPC", patience=0.8, rand_tau=1)

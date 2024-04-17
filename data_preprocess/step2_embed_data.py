@@ -66,7 +66,6 @@ def similarity_and_probabilities(query_embeddings, cluster_centers):
 
 
 def run_step2_embed_data(data_name, ncluster=20):
-    data_name = 'sogou_small'
     file_path = f"../data_preprocessed/{data_name}/raw_{data_name}_processed.csv"
     df = load_data(file_path)
 

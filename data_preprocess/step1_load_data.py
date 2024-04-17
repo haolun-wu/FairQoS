@@ -33,10 +33,10 @@ def run_step1_load_data(data_name):
 
     if data_name == 'sogou_small':
         with open('../data/sogou/SogouQ.sample', 'r', encoding='gb18030') as f:
-            data = [parse_line(line) for line in f]
+            data = [parse_line(line) for line in f if len(parse_line(line)) == 6]
     elif data_name == 'sogou':
         with open('../data/sogou/SogouQ.reduced', 'r', encoding='gb18030') as f:
-            data = [parse_line(line) for line in f]
+            data = [parse_line(line) for line in f if len(parse_line(line)) == 6]
 
     # Convert data list to pandas DataFrame
     data_df = pd.DataFrame(data, columns=col_names)
@@ -53,5 +53,5 @@ def run_step1_load_data(data_name):
 
 
 if __name__ == '__main__':
-    data_name = 'sogou_small'
+    data_name = 'sogou'
     run_step1_load_data(data_name)
