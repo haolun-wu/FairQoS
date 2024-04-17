@@ -5,11 +5,12 @@ def generate_prefixes(query_pinyin):
     words = str(query_pinyin).split()
     return [' '.join(words[:i + 1]) for i in range(len(words))]
 
-def generate_and_save_prefix_data(filename, data_name, n):
-    # 1. Load the file
+def run_step3_generate_prefix(data_name, ncount):
+    # 1. Load the full dataset with all query occurrences
+    filename = f'../data_preprocessed/{data_name}/new_{data_name}_processed.csv'
     df = pd.read_csv(filename)
 
-    # 2. Generate all possible prefixes
+    # 2. Generate all possible prefixes for each query instance
     all_prefixes = []
     for _, row in df.iterrows():
         query_id = row["QueryID"]
@@ -25,7 +26,7 @@ def generate_and_save_prefix_data(filename, data_name, n):
     prefix_counts = prefix_df["Query_prefix"].value_counts()
 
     # 4. Filter prefixes with cumulative count greater than n
-    valid_prefixes = prefix_counts[prefix_counts > n].index.tolist()
+    valid_prefixes = prefix_counts[prefix_counts > ncount].index.tolist()
     prefix_df = prefix_df[prefix_df["Query_prefix"].isin(valid_prefixes)]
 
     # 5. Create and save the sorted prefix mapping
@@ -37,7 +38,7 @@ def generate_and_save_prefix_data(filename, data_name, n):
     # Re-arrange the columns for better readability
     sorted_prefix_df = sorted_prefix_df[["Query_prefix_id", "Query_prefix", "Count"]]
     # Save the sorted dataframe to a file
-    sorted_prefix_df.to_csv(f'../data_preprocessed/{data_name}/i_mapping.csv', index=False)
+    sorted_prefix_df.to_csv(f'../data_preprocessed/{data_name}/q_mapping.csv', index=False)
 
     # 6. Add the Query_prefix_id to prefix_df
     prefix_id_map = sorted_prefix_df.set_index('Query_prefix')['Query_prefix_id'].to_dict()
@@ -45,9 +46,8 @@ def generate_and_save_prefix_data(filename, data_name, n):
 
     # 7. Save the resulting data with desired column order
     prefix_df = prefix_df[["Query_pinyin", "Query_prefix", "QueryID", "Query_prefix_id"]]
-    prefix_df.to_csv(f'../data_preprocessed/{data_name}/i_q_data.csv', index=False)
+    prefix_df.to_csv(f'../data_preprocessed/{data_name}/d_q_mapping.csv', index=False)
 
 if __name__ == "__main__":
     data_name = 'sogou_small'
-    # Usage
-    generate_and_save_prefix_data(f'../data_preprocessed/{data_name}/q_mapping.csv', data_name, n=20)
+    run_step3_generate_prefix(data_name, ncount=20)
