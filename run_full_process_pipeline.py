@@ -25,8 +25,8 @@ def main(data_name, ncluster, ncount, ranking_method, patience, rand_tau_list):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run data preprocessing and analysis pipeline.')
     parser.add_argument('--data_name', type=str, default='sogou_small', help='The name of the dataset to process.')
-    parser.add_argument('--ncluster', type=int, default=20, help='Number of clusters for step 2.')
-    parser.add_argument('--ncount', type=int, default=20, help='Count parameter for step 3.')
+    parser.add_argument('--ncluster', type=int, default=50, help='Number of clusters for step 2.')
+    parser.add_argument('--ncount', type=int, default=50, help='Count parameter for step 3.')
     parser.add_argument('--ranking_method', type=str, default='MPC', help='Ranking method for step 5.')
     parser.add_argument('--patience', type=float, default=0.8, help='Patience level for step 5.')
     parser.add_argument('--rand_tau', nargs='+', type=float, default=[8, 4, 2, 1, 0.5, 0.25, 0.125, 0], help='Random tau values for step 5.')
