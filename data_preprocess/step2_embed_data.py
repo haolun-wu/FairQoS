@@ -114,7 +114,7 @@ def run_step2_embed_data(data_name, ncluster=20):
 
     # Obtain embeddings
     query_embeddings = get_bert_embeddings(query_df["Query"].values).cpu().numpy()
-    print("query_embeddings:", query_embeddings.shape, query_embeddings.device)
+    print("query_embeddings:", query_embeddings.shape)
 
     pca = PCA(n_components=8)
     query_embeddings = pca.fit_transform(query_embeddings)
