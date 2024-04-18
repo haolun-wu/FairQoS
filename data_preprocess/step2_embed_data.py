@@ -113,7 +113,7 @@ def run_step2_embed_data(data_name, ncluster=20):
     query_df['Popularity'] = query_df['Query'].map(query_popularity)  # Adding the popularity column
 
     # Obtain embeddings
-    query_embeddings = get_bert_embeddings(query_df["Query"].values)
+    query_embeddings = get_bert_embeddings(query_df["Query"].values).cpu().numpy()
     print("query_embeddings:", query_embeddings.shape, query_embeddings.device)
 
     pca = PCA(n_components=8)
