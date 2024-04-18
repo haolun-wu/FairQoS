@@ -10,7 +10,11 @@ from pypinyin import lazy_pinyin
 from scipy.special import softmax
 import torch
 
+# from cuml.decomposition import PCA as cuPCA
+# from cuml.cluster import KMeans as cuKMeans
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 
 # Load the saved CSV
 def load_data(file_path):
@@ -30,12 +34,15 @@ def get_bert_embeddings(queries):
     for query in queries:
         inputs = tokenizer(query, return_tensors="pt", truncation=True, padding=True, max_length=512)
         inputs = {k: v.to(device) for k, v in inputs.items()}  # Move inputs to GPU
-        with torch.no_grad():
-            outputs = model(**inputs)
-        embeddings.append(
-            outputs[0].mean(1).cpu().detach().numpy().flatten())  # Move back to CPU for numpy compatibility
 
-    return np.array(embeddings)
+        with torch.no_grad():  # Disable gradient calculation to save memory and speed up
+            outputs = model(**inputs)
+            embeddings.append(outputs.last_hidden_state.mean(1))  # Keep as tensor
+
+        # Concatenate all embeddings along the batch dimension
+    embeddings = torch.cat(embeddings, dim=0)
+
+    return embeddings
 
 
 # Cluster the embeddings using Ward's method
@@ -74,13 +81,13 @@ def similarity_and_probabilities(query_embeddings, cluster_centers):
     query_embeddings = torch.tensor(query_embeddings, device=device)
     cluster_centers = torch.tensor(cluster_centers, device=device)
     # 1. Compute similarity matrix using inner products
-    similarity_matrix = np.dot(query_embeddings, cluster_centers.T)
+    similarity_matrix = torch.matmul(query_embeddings, cluster_centers.T)
 
     # 2. Compute p(query|center) - softmax over columns
-    p_query_given_center = softmax(similarity_matrix, axis=0).cpu().numpy()
+    p_query_given_center = torch.softmax(similarity_matrix, dim=0).cpu().numpy()
 
     # 3. Compute p(center|query) - softmax over rows
-    p_center_given_query = softmax(similarity_matrix, axis=1).T.cpu().numpy()
+    p_center_given_query = torch.softmax(similarity_matrix, dim=1).T.cpu().numpy()
 
     return similarity_matrix, p_query_given_center, p_center_given_query
 
