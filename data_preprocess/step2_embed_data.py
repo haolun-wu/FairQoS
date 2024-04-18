@@ -8,7 +8,9 @@ from scipy.cluster.hierarchy import dendrogram, ward
 import matplotlib.pyplot as plt
 from pypinyin import lazy_pinyin
 from scipy.special import softmax
+import torch
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Load the saved CSV
 def load_data(file_path):
@@ -17,17 +19,21 @@ def load_data(file_path):
 
 # Obtain BERT embeddings for queries
 def get_bert_embeddings(queries):
-    # tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
-    # model = BertModel.from_pretrained("bert-base-chinese")
     tokenizer = BertTokenizerFast.from_pretrained('bert-base-chinese')
     model = AutoModel.from_pretrained('ckiplab/bert-tiny-chinese')
+
+    # Move model to GPU
+    model.to(device)
 
     embeddings = []
 
     for query in queries:
         inputs = tokenizer(query, return_tensors="pt", truncation=True, padding=True, max_length=512)
-        outputs = model(**inputs)
-        embeddings.append(outputs[0].mean(1).detach().numpy().flatten())
+        inputs = {k: v.to(device) for k, v in inputs.items()}  # Move inputs to GPU
+        with torch.no_grad():
+            outputs = model(**inputs)
+        embeddings.append(
+            outputs[0].mean(1).cpu().detach().numpy().flatten())  # Move back to CPU for numpy compatibility
 
     return np.array(embeddings)
 
@@ -65,14 +71,16 @@ def cluster_embeddings(embeddings, n_clusters=None):
 
 
 def similarity_and_probabilities(query_embeddings, cluster_centers):
+    query_embeddings = torch.tensor(query_embeddings, device=device)
+    cluster_centers = torch.tensor(cluster_centers, device=device)
     # 1. Compute similarity matrix using inner products
     similarity_matrix = np.dot(query_embeddings, cluster_centers.T)
 
     # 2. Compute p(query|center) - softmax over columns
-    p_query_given_center = softmax(similarity_matrix, axis=0)
+    p_query_given_center = softmax(similarity_matrix, axis=0).cpu().numpy()
 
     # 3. Compute p(center|query) - softmax over rows
-    p_center_given_query = softmax(similarity_matrix, axis=1).T
+    p_center_given_query = softmax(similarity_matrix, axis=1).T.cpu().numpy()
 
     return similarity_matrix, p_query_given_center, p_center_given_query
 
@@ -99,6 +107,7 @@ def run_step2_embed_data(data_name, ncluster=20):
 
     # Obtain embeddings
     query_embeddings = get_bert_embeddings(query_df["Query"].values)
+    print("query_embeddings:", query_embeddings.shape, query_embeddings.device)
 
     pca = PCA(n_components=8)
     query_embeddings = pca.fit_transform(query_embeddings)
