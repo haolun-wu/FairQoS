@@ -11,7 +11,7 @@ module load cuda
 nvidia-smi
 
 # Run your script with the current hyperparameter combination
-python3 /home/haolun/projects/def-cpsmcgil/haolun/FairQoS/run_full_process_pipeline.py --data_name=sogou --ncount=100
+python3 /home/haolun/projects/def-cpsmcgil/haolun/FairQoS/run_full_process_pipeline.py --data_name=sogou --ncount=100 --ncluster=20
 
 deactivate
 EOL
