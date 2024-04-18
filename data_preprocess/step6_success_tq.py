@@ -3,8 +3,8 @@ import numpy as np
 
 def run_step6_compute_success_tq(data_name):
     # Load the probabilities from the files
-    prob_d_t = np.load(f"../data_preprocessed/{data_name}/prob_matrix/p(d|t).npy")
-    prob_d_q_exposure = np.load(f"../data_preprocessed/{data_name}/prob_matrix/p(d_exposure|q).npy")
+    prob_d_t = np.load(f"./data_preprocessed/{data_name}/prob_matrix/p(d|t).npy")
+    prob_d_q_exposure = np.load(f"./data_preprocessed/{data_name}/prob_matrix/p(d_exposure|q).npy")
 
     # print("prob_d_t:", prob_d_t.shape)
     # print("prob_d_q_exposure:", prob_d_q_exposure.shape)
@@ -27,7 +27,7 @@ def run_step6_compute_success_tq(data_name):
     # Then broadcast multiply it with p_e_d_given_q which gets automatically broadcasted from (#d, #q) to (#d, 1, #q)
     success_d_tq = prob_d_t * prob_d_q_exposure[:, np.newaxis, :]
 
-    file_path = f"../data_preprocessed/{data_name}/prob_matrix/p(s_d|tq).npy"
+    file_path = f"./data_preprocessed/{data_name}/prob_matrix/p(s_d|tq).npy"
     np.save(file_path, success_d_tq)
     # print("success_d_tq:", success_d_tq.shape)
 
@@ -39,7 +39,7 @@ def run_step6_compute_success_tq(data_name):
 
     # Subtract the product from 1 to get p(s|t,q)
     success_tq = 1 - product_complement
-    file_path = f"../data_preprocessed/{data_name}/prob_matrix/p(s|tq).npy"
+    file_path = f"./data_preprocessed/{data_name}/prob_matrix/p(s|tq).npy"
     np.save(file_path, success_tq)
     # print("success_tq:", success_tq.shape)
 

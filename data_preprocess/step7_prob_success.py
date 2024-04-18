@@ -3,9 +3,9 @@ import numpy as np
 
 def compute_p_S_sum_of_product(data_name):
     # Load necessary matrices
-    p_t_qg_dict = np.load(f'../data_preprocessed/{data_name}/prob_matrix/p(t|qg).npy', allow_pickle=True).item()
-    p_s_tq = np.load(f'../data_preprocessed/{data_name}/prob_matrix/p(s|tq).npy')
-    p_q = np.load(f'../data_preprocessed/{data_name}/prob_matrix/p(q).npy')
+    p_t_qg_dict = np.load(f'./data_preprocessed/{data_name}/prob_matrix/p(t|qg).npy', allow_pickle=True).item()
+    p_s_tq = np.load(f'./data_preprocessed/{data_name}/prob_matrix/p(s|tq).npy')
+    p_q = np.load(f'./data_preprocessed/{data_name}/prob_matrix/p(q).npy')
 
     # Initialize p(S)
     p_S = 0
@@ -36,9 +36,9 @@ def compute_p_S_sum_of_product(data_name):
 
 def compute_p_S_product_of_sum(data_name):
     # Load necessary matrices
-    p_t_qg_dict = np.load(f'../data_preprocessed/{data_name}/prob_matrix/p(t|qg).npy', allow_pickle=True).item()
-    p_s_tq = np.load(f'../data_preprocessed/{data_name}/prob_matrix/p(s|tq).npy')
-    p_q_g_dict = np.load(f'../data_preprocessed/{data_name}/prob_matrix/p(q|g).npy', allow_pickle=True).item()
+    p_t_qg_dict = np.load(f'./data_preprocessed/{data_name}/prob_matrix/p(t|qg).npy', allow_pickle=True).item()
+    p_s_tq = np.load(f'./data_preprocessed/{data_name}/prob_matrix/p(s|tq).npy')
+    p_q_g_dict = np.load(f'./data_preprocessed/{data_name}/prob_matrix/p(q|g).npy', allow_pickle=True).item()
 
     # Initialize p(S) as 1 because we will be multiplying terms
     p_S = 1
@@ -62,8 +62,8 @@ def compute_p_S_product_of_sum(data_name):
 
 def compute_p_S_given_q(data_name):
     # Load the probabilities
-    p_t_qg_dict = np.load(f'../data_preprocessed/{data_name}/prob_matrix/p(t|qg).npy', allow_pickle=True).item()
-    p_s_tq = np.load(f'../data_preprocessed/{data_name}/prob_matrix/p(s|tq).npy')
+    p_t_qg_dict = np.load(f'./data_preprocessed/{data_name}/prob_matrix/p(t|qg).npy', allow_pickle=True).item()
+    p_s_tq = np.load(f'./data_preprocessed/{data_name}/prob_matrix/p(s|tq).npy')
 
     # Number of queries is the second dimension in p(s|t,q)
     num_queries = p_s_tq.shape[1]
@@ -93,8 +93,8 @@ def compute_p_S_given_q(data_name):
 
 def compute_p_S_given_q_no_group(data_name):
     # Load the probabilities
-    p_t_q = np.load(f'../data_preprocessed/{data_name}/prob_matrix/p(t|q).npy')
-    p_s_tq = np.load(f'../data_preprocessed/{data_name}/prob_matrix/p(s|tq).npy')
+    p_t_q = np.load(f'./data_preprocessed/{data_name}/prob_matrix/p(t|q).npy')
+    p_s_tq = np.load(f'./data_preprocessed/{data_name}/prob_matrix/p(s|tq).npy')
 
     # Compute p(S|q) by summing over intents (assumes first dimension of p(s|t,q) is intents)
     p_S_given_q_no_group = np.sum(p_t_q * p_s_tq, axis=0)

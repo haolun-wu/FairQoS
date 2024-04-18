@@ -32,10 +32,10 @@ def run_step1_load_data(data_name):
     col_names = ['AccessTime', 'UserID', 'Query', 'URLRank', 'ClickSequence', 'URLID']
 
     if data_name == 'sogou_small':
-        with open('../data/sogou/SogouQ.sample', 'r', encoding='gb18030') as f:
+        with open('./data/sogou/SogouQ.sample', 'r', encoding='gb18030') as f:
             data = [parse_line(line) for line in f if len(parse_line(line)) == 6]
     elif data_name == 'sogou':
-        with open('../data/sogou/SogouQ.reduced', 'r', encoding='gb18030') as f:
+        with open('./data/sogou/SogouQ.reduced', 'r', encoding='gb18030') as f:
             data = [parse_line(line) for line in f if len(parse_line(line)) == 6]
 
     # Convert data list to pandas DataFrame
@@ -49,7 +49,7 @@ def run_step1_load_data(data_name):
                                     1)
 
     # Saving processed data
-    data_df.to_csv(f'../data_preprocessed/{data_name}/raw_{data_name}_processed.csv', index=False)
+    data_df.to_csv(f'./data_preprocessed/{data_name}/raw_{data_name}_processed.csv', index=False)
 
 
 if __name__ == '__main__':

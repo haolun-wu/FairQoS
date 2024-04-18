@@ -8,9 +8,9 @@ import numpy as np
 
 def basic_statistics(data_name):
     data_df = pd.read_csv(
-        f'../data_preprocessed/{data_name}/new_{data_name}_processed.csv')  # replace with your sogou data file
+        f'./data_preprocessed/{data_name}/new_{data_name}_processed.csv')  # replace with your sogou data file
     prefix_df = pd.read_csv(
-        f'../data_preprocessed/{data_name}/q_mapping.csv')
+        f'./data_preprocessed/{data_name}/q_mapping.csv')
     if data_name in ['sogou', 'sogou_small']:
         # @title basic statistics
         unique_users = data_df['UserID'].unique()

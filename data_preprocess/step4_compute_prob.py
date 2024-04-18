@@ -15,9 +15,9 @@ def plot_heatmap(matrix, title, xlabel_name, ylabel_name):
 
 
 def compute_p_d_qg_and_p_d_q(data_name):
-    data_file = f'../data_preprocessed/{data_name}/new_{data_name}_processed.csv'
-    mapping_file = f'../data_preprocessed/{data_name}/q_mapping.csv'
-    dq_data_file = f'../data_preprocessed/{data_name}/d_q_mapping.csv'
+    data_file = f'./data_preprocessed/{data_name}/new_{data_name}_processed.csv'
+    mapping_file = f'./data_preprocessed/{data_name}/q_mapping.csv'
+    dq_data_file = f'./data_preprocessed/{data_name}/d_q_mapping.csv'
 
     # Load the datasets
     df = pd.read_csv(data_file)
@@ -78,7 +78,7 @@ def compute_p_d_qg_and_p_d_q(data_name):
     print("--------")
 
     # Save the entire dictionary
-    np.save(f"../data_preprocessed/{data_name}/prob_matrix/p(d|qg).npy", prob_d_qg_dict)
+    np.save(f"./data_preprocessed/{data_name}/prob_matrix/p(d|qg).npy", prob_d_qg_dict)
 
     print("--------")
     print("p(d|q) matrix details:")
@@ -86,21 +86,21 @@ def compute_p_d_qg_and_p_d_q(data_name):
     print("--------")
 
     # Optionally, save the p(d|q) matrix
-    np.save(f"../data_preprocessed/{data_name}/prob_matrix/p(d|q).npy", pdq_matrix)
+    np.save(f"./data_preprocessed/{data_name}/prob_matrix/p(d|q).npy", pdq_matrix)
 
     return unique_groups
 
 
 def compute_p_t_qg(data_name, unique_groups):
     # Load p(t|d)
-    prob_t_d = np.load(f'../data_preprocessed/{data_name}/prob_matrix/p(t|d).npy')
+    prob_t_d = np.load(f'./data_preprocessed/{data_name}/prob_matrix/p(t|d).npy')
 
     # Initialize prob_t_ig dictionary
     prob_t_qg_dict = {}
     for group in unique_groups:
         # Load p(d|q,g) for the specific group from the dictionary
         prob_d_ig = \
-            np.load(f'../data_preprocessed/{data_name}/prob_matrix/p(d|qg).npy', allow_pickle=True).item()[group]
+            np.load(f'./data_preprocessed/{data_name}/prob_matrix/p(d|qg).npy', allow_pickle=True).item()[group]
 
         # Compute p(t|i,g)
         prob_t_qg = np.matmul(prob_t_d, prob_d_ig)
@@ -113,12 +113,12 @@ def compute_p_t_qg(data_name, unique_groups):
     print("--------")
 
     # Save the entire dictionary
-    np.save(f"../data_preprocessed/{data_name}/prob_matrix/p(t|qg).npy", prob_t_qg_dict)
+    np.save(f"./data_preprocessed/{data_name}/prob_matrix/p(t|qg).npy", prob_t_qg_dict)
 
 
 def compute_p_t_q(data_name):
-    prob_t_d = np.load(f'../data_preprocessed/{data_name}/prob_matrix/p(t|d).npy') # Load p(t|d)
-    prob_d_q = np.load(f'../data_preprocessed/{data_name}/prob_matrix/p(d|q).npy') # Load p(d|q) matrix
+    prob_t_d = np.load(f'./data_preprocessed/{data_name}/prob_matrix/p(t|d).npy') # Load p(t|d)
+    prob_d_q = np.load(f'./data_preprocessed/{data_name}/prob_matrix/p(d|q).npy') # Load p(d|q) matrix
 
     # Compute p(t|q) = sum_d p(t|d) * p(d|q)
     prob_t_q = np.matmul(prob_t_d, prob_d_q)
@@ -130,7 +130,7 @@ def compute_p_t_q(data_name):
     print("--------")
 
     # Save the p(t|q) matrix
-    np.save(f"../data_preprocessed/{data_name}/prob_matrix/p(t|q).npy", prob_t_q)
+    np.save(f"./data_preprocessed/{data_name}/prob_matrix/p(t|q).npy", prob_t_q)
 
 
 # Example usage:
@@ -139,12 +139,12 @@ def compute_p_t_q(data_name):
 
 def compute_p_q(data_name):
     # Load the sorted prefix dataframe
-    sorted_prefix_df = pd.read_csv(f'../data_preprocessed/{data_name}/q_mapping.csv')
+    sorted_prefix_df = pd.read_csv(f'./data_preprocessed/{data_name}/q_mapping.csv')
 
     # Compute p(q)
     total_count = sorted_prefix_df["Count"].sum()
     prob_q = sorted_prefix_df["Count"] / total_count
-    np.save(f'../data_preprocessed/{data_name}/prob_matrix/p(q).npy', prob_q.values)
+    np.save(f'./data_preprocessed/{data_name}/prob_matrix/p(q).npy', prob_q.values)
 
     print("prob_q:")
     print("shape and sum:", prob_q.shape, prob_q.sum())
@@ -153,11 +153,11 @@ def compute_p_q(data_name):
 
 def compute_p_q_g(data_name, unique_groups):
     # Load the sorted prefix dataframe
-    sorted_prefix_df = pd.read_csv(f'../data_preprocessed/{data_name}/q_mapping.csv')
+    sorted_prefix_df = pd.read_csv(f'./data_preprocessed/{data_name}/q_mapping.csv')
 
     # Load the prefix_df and data_df
-    prefix_df = pd.read_csv(f'../data_preprocessed/{data_name}/d_q_mapping.csv')
-    data_df = pd.read_csv(f'../data_preprocessed/{data_name}/new_{data_name}_processed.csv')
+    prefix_df = pd.read_csv(f'./data_preprocessed/{data_name}/d_q_mapping.csv')
+    data_df = pd.read_csv(f'./data_preprocessed/{data_name}/new_{data_name}_processed.csv')
 
     # Merge them based on 'QueryID' to get 'UserGroup' in prefix_df
     merged_df = prefix_df.merge(data_df[['QueryID', 'UserGroup']], on='QueryID', how='left')
@@ -179,7 +179,7 @@ def compute_p_q_g(data_name, unique_groups):
     print("shape and sum:", prob_q_g_dict[0].shape, prob_q_g_dict[0].sum())
     print("--------")
 
-    np.save(f'../data_preprocessed/{data_name}/prob_matrix/p(q|g).npy', prob_q_g_dict)
+    np.save(f'./data_preprocessed/{data_name}/prob_matrix/p(q|g).npy', prob_q_g_dict)
 
 
 def run_step4_compute_prob(data_name):
@@ -199,8 +199,8 @@ if __name__ == "__main__":
     run_step4_compute_prob(data_name)
 
     # Load matrices
-    prob_d_qg = np.load(f'../data_preprocessed/{data_name}/prob_matrix/p(d|qg).npy', allow_pickle=True).item()
-    prob_t_qg = np.load(f'../data_preprocessed/{data_name}/prob_matrix/p(t|qg).npy', allow_pickle=True).item()
+    prob_d_qg = np.load(f'./data_preprocessed/{data_name}/prob_matrix/p(d|qg).npy', allow_pickle=True).item()
+    prob_t_qg = np.load(f'./data_preprocessed/{data_name}/prob_matrix/p(t|qg).npy', allow_pickle=True).item()
 
     # Plot heatmaps
     plot_heatmap(prob_d_qg[0], "Probability Distribution for User Group 0", xlabel_name='prefix (q)',

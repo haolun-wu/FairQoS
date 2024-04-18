@@ -66,7 +66,7 @@ def similarity_and_probabilities(query_embeddings, cluster_centers):
 
 
 def run_step2_embed_data(data_name, ncluster=20):
-    file_path = f"../data_preprocessed/{data_name}/raw_{data_name}_processed.csv"
+    file_path = f"./data_preprocessed/{data_name}/raw_{data_name}_processed.csv"
     df = load_data(file_path)
 
     # Clean up 'Query' column
@@ -101,10 +101,10 @@ def run_step2_embed_data(data_name, ncluster=20):
     query_df["ClusterID"] = query_df["Query"].map(query_cluster_map)
 
     # Save
-    query_df.to_csv(f"../data_preprocessed/{data_name}/d_t_mapping.csv", index=False)
-    np.save(f"../data_preprocessed/{data_name}/embedding_matrix/d_emb_matrix.npy", query_embeddings)
-    np.save(f"../data_preprocessed/{data_name}/embedding_matrix/t_emb_matrix.npy", cluster_centers)
-    df.to_csv(f"../data_preprocessed/{data_name}/new_{data_name}_processed.csv", index=False)
+    query_df.to_csv(f"./data_preprocessed/{data_name}/d_t_mapping.csv", index=False)
+    np.save(f"./data_preprocessed/{data_name}/embedding_matrix/d_emb_matrix.npy", query_embeddings)
+    np.save(f"./data_preprocessed/{data_name}/embedding_matrix/t_emb_matrix.npy", cluster_centers)
+    df.to_csv(f"./data_preprocessed/{data_name}/new_{data_name}_processed.csv", index=False)
 
     print(f"Obtained {len(cluster_centers)} cluster centers.")
 
@@ -114,8 +114,8 @@ def run_step2_embed_data(data_name, ncluster=20):
     print("p_d|t:", p_dt.sum(0))
     print("p_t|d:", p_td.shape)
     print("p_t|d:", p_td.sum(0))
-    np.save(f"../data_preprocessed/{data_name}/prob_matrix/p(d|t).npy", p_dt)
-    np.save(f"../data_preprocessed/{data_name}/prob_matrix/p(t|d).npy", p_td)
+    np.save(f"./data_preprocessed/{data_name}/prob_matrix/p(d|t).npy", p_dt)
+    np.save(f"./data_preprocessed/{data_name}/prob_matrix/p(t|d).npy", p_td)
 
 
 if __name__ == "__main__":
