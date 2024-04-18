@@ -2,7 +2,7 @@
 #SBATCH --account=ctb-lcharlin
 #SBATCH --output="/home/haolun/projects/def-cpsmcgil/haolun/FairQoS/exp_out/sogou.out"
 #SBATCH --gres=gpu:a100:1
-#SBATCH --time=02:00:00
+#SBATCH --time=05:00:00
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=40000M
 

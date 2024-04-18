@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.cluster import DBSCAN, AgglomerativeClustering, KMeans
+from sklearn.decomposition import PCA
 from sklearn.preprocessing import normalize
 from transformers import BertTokenizer, BertModel, BertTokenizerFast, AutoModel
 from scipy.cluster.hierarchy import dendrogram, ward
@@ -53,10 +54,9 @@ def get_bert_embeddings(queries):
 # Kmeans
 def cluster_embeddings(embeddings, n_clusters=None):
     if not n_clusters:
-        # Prompt user to input the number of clusters if not provided
         n_clusters = int(input("Enter the number of clusters: "))
 
-    # Initialize and fit the K-Means model
+    # Initialize and fit the K-Means model on the reduced embeddings
     cluster = KMeans(n_clusters=n_clusters, random_state=42)
     labels = cluster.fit_predict(embeddings)
     cluster_centers = cluster.cluster_centers_
@@ -99,6 +99,10 @@ def run_step2_embed_data(data_name, ncluster=20):
 
     # Obtain embeddings
     query_embeddings = get_bert_embeddings(query_df["Query"].values)
+
+    pca = PCA(n_components=8)
+    query_embeddings = pca.fit_transform(query_embeddings)
+    print("query_embeddings:", query_embeddings.shape)
 
     # Cluster embeddings and obtain cluster labels and centers
     cluster_labels, cluster_centers = cluster_embeddings(query_embeddings, n_clusters=ncluster)
