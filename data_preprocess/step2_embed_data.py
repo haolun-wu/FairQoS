@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from sklearn.cluster import DBSCAN, AgglomerativeClustering
+from sklearn.cluster import DBSCAN, AgglomerativeClustering, KMeans
 from sklearn.preprocessing import normalize
 from transformers import BertTokenizer, BertModel, BertTokenizerFast, AutoModel
 from scipy.cluster.hierarchy import dendrogram, ward
@@ -32,24 +32,36 @@ def get_bert_embeddings(queries):
 
 
 # Cluster the embeddings using Ward's method
+# def cluster_embeddings(embeddings, n_clusters=None):
+#     if not n_clusters:
+#         linkage_array = ward(embeddings)
+#         plt.figure(figsize=(10, 5))
+#         dendrogram(linkage_array)
+#         plt.show()
+#         n_clusters = int(input("Enter the number of clusters based on the dendrogram: "))
+#
+#     cluster = AgglomerativeClustering(n_clusters=n_clusters, linkage='ward')
+#     labels = cluster.fit_predict(embeddings)
+#
+#     cluster_centers = []
+#     for label in set(labels):
+#         members = embeddings[labels == label]
+#         cluster_center = members.mean(axis=0)
+#         cluster_centers.append(cluster_center)
+#
+#     return labels, np.array(cluster_centers)
+# Kmeans
 def cluster_embeddings(embeddings, n_clusters=None):
     if not n_clusters:
-        linkage_array = ward(embeddings)
-        plt.figure(figsize=(10, 5))
-        dendrogram(linkage_array)
-        plt.show()
-        n_clusters = int(input("Enter the number of clusters based on the dendrogram: "))
+        # Prompt user to input the number of clusters if not provided
+        n_clusters = int(input("Enter the number of clusters: "))
 
-    cluster = AgglomerativeClustering(n_clusters=n_clusters, linkage='ward')
+    # Initialize and fit the K-Means model
+    cluster = KMeans(n_clusters=n_clusters, random_state=42)
     labels = cluster.fit_predict(embeddings)
+    cluster_centers = cluster.cluster_centers_
 
-    cluster_centers = []
-    for label in set(labels):
-        members = embeddings[labels == label]
-        cluster_center = members.mean(axis=0)
-        cluster_centers.append(cluster_center)
-
-    return labels, np.array(cluster_centers)
+    return labels, cluster_centers
 
 
 def similarity_and_probabilities(query_embeddings, cluster_centers):
