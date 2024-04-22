@@ -204,7 +204,7 @@ if __name__ == '__main__':
             axes[i, j].set_xticklabels(xticks)
 
     # plt.suptitle('Model:{}'.format(args.model), y=0.98, fontsize=20)
-
     plt.tight_layout()
     plt.savefig('./fig/RQ1.1.pdf')
+
     plt.show()

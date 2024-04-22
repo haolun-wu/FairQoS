@@ -65,7 +65,7 @@ def run_step5_compute_prob_exposure(data_name, ranking_method="MPC", patience=0.
             scores_array = scores_array / np.sum(scores_array)
             weight = softmax(scores_array / rand_tau)
 
-            sample_times = 200
+            sample_times = 100
 
             for sample_epoch in range(sample_times):
                 exp_vector = np.power(patience, np.arange(num_queries)).astype("float")  # pre-compute the exposure
